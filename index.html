@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#101a35">
+<title>LIVE VOICE TRANSLATOR</title>
+<style>
+:root{--navy:#101a35;--navy2:#182747;--blue:#3478f6;--cyan:#55c7e8;--ink:#17233c;--muted:#71809b;--line:#e5eaf2;--bg:#f3f6fb;--white:#fff;--green:#159b75;--orange:#f0a43a}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:Inter,Segoe UI,Arial,sans-serif;color:var(--ink)}
+header{background:linear-gradient(120deg,#101a35,#203d70);color:white;padding:22px 5vw 26px}
+.top{max-width:1240px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:18px}
+.brand{display:flex;align-items:center;gap:13px}.logo{width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,#4c91ff,#54d0d9);display:grid;place-items:center;font-size:23px}
+h1{font-size:clamp(20px,3vw,28px);margin:0;letter-spacing:.4px}.sub{color:#c4d5f1;font-size:13px;margin-top:5px}
+.pill{border:1px solid #55729e;color:#d8e7ff;border-radius:30px;padding:8px 12px;font-size:12px;white-space:nowrap}
+main{max-width:1240px;margin:26px auto;padding:0 20px}
+.toolbar{background:white;border:1px solid var(--line);border-radius:18px;padding:17px;display:grid;grid-template-columns:1fr auto 1fr;gap:14px;align-items:end;box-shadow:0 5px 18px #1a31500b}
+.field label{display:block;font-size:12px;font-weight:700;color:var(--muted);margin:0 0 7px}
+select{width:100%;border:1px solid #dce3ef;border-radius:11px;padding:12px;background:#fff;color:var(--ink);font-size:14px;outline:none}
+.swap{width:42px;height:42px;border:0;border-radius:12px;background:#eaf2ff;color:var(--blue);font-size:20px;cursor:pointer}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px}
+.panel{background:white;border:1px solid var(--line);border-radius:19px;overflow:hidden;box-shadow:0 7px 22px #1a31500b}
+.panelhead{padding:17px 19px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}
+.person{display:flex;align-items:center;gap:10px;font-weight:750}.avatar{width:35px;height:35px;border-radius:11px;display:grid;place-items:center;background:#eaf2ff;color:#2869dc}
+.tag{font-size:11px;color:#61718b;background:#f1f4f9;padding:6px 9px;border-radius:20px}
+.content{padding:18px;min-height:220px;display:flex;flex-direction:column;gap:12px}
+.transcript{background:#f6f8fc;border:1px solid #edf0f6;border-radius:13px;padding:14px;min-height:90px;line-height:1.55;font-size:15px;white-space:pre-wrap;overflow-wrap:anywhere}
+.transcript .hint{color:#9aa6b8;font-size:13px}
+.result{background:#eef8f5;border:1px solid #d9f0e8;border-radius:13px;padding:14px;min-height:76px;line-height:1.55;font-size:15px;overflow-wrap:anywhere}
+.result .hint{color:#7e9d93;font-size:13px}
+.actions{display:flex;gap:9px;flex-wrap:wrap}
+button{font:inherit;cursor:pointer}
+.mic{border:0;background:var(--blue);color:white;border-radius:12px;padding:12px 16px;font-weight:700;display:flex;align-items:center;gap:8px}
+.mic.secondary{background:#14264a}.mic.listening{background:#d84d61;animation:pulse 1.2s infinite}
+.smallbtn{border:1px solid #dce3ef;background:white;color:#53627b;border-radius:11px;padding:10px 12px}
+@keyframes pulse{50%{box-shadow:0 0 0 7px #d84d6122}}
+.status{font-size:12px;color:var(--muted);min-height:18px}
+.centerbar{margin-top:18px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 17px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.centerbar strong{font-size:13px}.centerbar span{font-size:12px;color:var(--muted)}
+.notice{margin-top:17px;padding:15px 17px;border-radius:14px;background:#fff8eb;border:1px solid #f7e5c2;color:#795b27;font-size:12px;line-height:1.6}
+.history{margin-top:18px;background:white;border:1px solid var(--line);border-radius:17px;padding:17px}
+.historyhead{display:flex;justify-content:space-between;align-items:center;gap:10px}.history h3{margin:0;font-size:15px}
+.historylist{margin-top:12px;display:flex;flex-direction:column;gap:9px;max-height:230px;overflow:auto}
+.entry{border:1px solid #edf0f5;border-radius:11px;padding:10px 12px;font-size:12px;line-height:1.5}
+.entry b{color:#365b9a}.empty{font-size:12px;color:#98a4b5}
+footer{text-align:center;color:#98a4b5;font-size:11px;padding:24px}
+@media(max-width:760px){.toolbar{grid-template-columns:1fr 42px 1fr}.grid{grid-template-columns:1fr}.content{min-height:180px}.pill{display:none}}
+</style>
+</head>
+<body>
+<header><div class="top"><div class="brand"><div class="logo">⇄</div><div><h1>LIVE VOICE TRANSLATOR</h1><div class="sub">Percakapan dua orang • Terjemahan suara langsung</div></div></div><div class="pill">WEB APP • PC & MOBILE</div></div></header>
+<main>
+  <section class="toolbar">
+    <div class="field"><label for="langA">BAHASA ORANG A</label><select id="langA"></select></div>
+    <button class="swap" id="swap" title="Tukar bahasa">⇄</button>
+    <div class="field"><label for="langB">BAHASA ORANG B</label><select id="langB"></select></div>
+  </section>
+  <section class="grid">
+    <article class="panel">
+      <div class="panelhead"><div class="person"><div class="avatar">A</div> Orang A</div><span class="tag" id="tagA">Bahasa Indonesia</span></div>
+      <div class="content">
+        <div><div class="field"><label>UCAPAN ASLI</label></div><div class="transcript" id="sourceA"><span class="hint">Tekan tombol mikrofon, lalu mulai berbicara…</span></div></div>
+        <div><div class="field"><label>HASIL TERJEMAHAN</label></div><div class="result" id="resultA"><span class="hint">Terjemahan akan muncul di sini.</span></div></div>
+        <div class="actions"><button class="mic" id="micA">🎙️ Bicara A</button><button class="smallbtn" id="speakA">🔊 Putar</button><button class="smallbtn" id="copyA">Salin</button></div>
+        <div class="status" id="statusA">Siap menerima suara.</div>
+      </div>
+    </article>
+    <article class="panel">
+      <div class="panelhead"><div class="person"><div class="avatar">B</div> Orang B</div><span class="tag" id="tagB">English</span></div>
+      <div class="content">
+        <div><div class="field"><label>UCAPAN ASLI</label></div><div class="transcript" id="sourceB"><span class="hint">Tekan tombol mikrofon, lalu mulai berbicara…</span></div></div>
+        <div><div class="field"><label>HASIL TERJEMAHAN</label></div><div class="result" id="resultB"><span class="hint">Terjemahan akan muncul di sini.</span></div></div>
+        <div class="actions"><button class="mic secondary" id="micB">🎙️ Bicara B</button><button class="smallbtn" id="speakB">🔊 Putar</button><button class="smallbtn" id="copyB">Salin</button></div>
+        <div class="status" id="statusB">Siap menerima suara.</div>
+      </div>
+    </article>
+  </section>
+  <section class="centerbar"><div><strong>Mode percakapan dua arah</strong><br><span>Pilih mikrofon sesuai orang yang sedang berbicara. Terjemahan dan suara akan dibuat otomatis.</span></div><div class="actions"><button class="smallbtn" id="stopAll">■ Hentikan mikrofon</button><button class="smallbtn" id="clearAll">Bersihkan percakapan</button></div></section>
+  <section class="history"><div class="historyhead"><h3>Riwayat percakapan</h3><span class="tag" id="count">0 percakapan</span></div><div class="historylist" id="history"><div class="empty">Belum ada percakapan.</div></div></section>
+  <div class="notice"><b>Catatan prototype:</b> Pengenalan suara menggunakan fitur browser (Web Speech API) dan paling baik di Google Chrome/Edge dengan koneksi internet serta izin mikrofon. Terjemahan memakai layanan MyMemory tanpa API key, dengan batas penggunaan dan dukungan bahasa yang dapat berubah. Untuk percakapan dua arah, masing-masing orang menekan tombol mikrofonnya saat berbicara; browser belum dapat memisahkan dua suara secara andal dari satu mikrofon. Hasil suara menggunakan suara Text-to-Speech yang tersedia di perangkat.</div>
+</main>
+<footer>LIVE VOICE TRANSLATOR • Prototype 1.0 • Gunakan Chrome atau Microsoft Edge</footer>
+<script>
+const languages=[
+['id-ID','Indonesia','id'],['en-US','English','en'],['ja-JP','日本語 (Jepang)','ja'],['zh-CN','中文 (Mandarin)','zh-CN'],
+['ko-KR','한국어 (Korea)','ko'],['fr-FR','Français','fr'],['de-DE','Deutsch','de'],['es-ES','Español','es'],
+['it-IT','Italiano','it'],['pt-PT','Português','pt'],['nl-NL','Nederlands','nl'],['ru-RU','Русский','ru'],
+['ar-SA','العربية','ar'],['hi-IN','हिन्दी','hi'],['th-TH','ไทย','th'],['vi-VN','Tiếng Việt','vi'],
+['ms-MY','Bahasa Melayu','ms'],['tr-TR','Türkçe','tr'],['bn-IN','বাংলা','bn'],['fil-PH','Filipino','tl'],
+['pl-PL','Polski','pl'],['uk-UA','Українська','uk'],['sv-SE','Svenska','sv'],['el-GR','Ελληνικά','el'],
+['he-IL','עברית','he'],['ta-IN','தமிழ்','ta'],['fa-IR','فارسی','fa'],['cs-CZ','Čeština','cs']
+];
+const $=id=>document.getElementById(id);
+for(const id of ['langA','langB']) languages.forEach(([code,name])=>{const o=document.createElement('option');o.value=code;o.textContent=name;$(id).append(o)});
+$('langA').value='id-ID';$('langB').value='en-US';
+let active=null, recognition=null, records=[];
+function lang(code){return languages.find(x=>x[0]===code)||languages[0]}
+function updateTags(){$('tagA').textContent=lang($('langA').value)[1];$('tagB').textContent=lang($('langB').value)[1]}
+$('langA').onchange=updateTags;$('langB').onchange=updateTags;
+$('swap').onclick=()=>{const a=$('langA').value;$('langA').value=$('langB').value;$('langB').value=a;updateTags()};
+function setText(id,text){$(id).textContent=text||''}
+function addHistory(side,source,result){records.unshift({side,source,result,time:new Date().toLocaleTimeString()});$('count').textContent=records.length+' percakapan';$('history').innerHTML=records.map(r=>`<div class="entry"><b>${r.time} • Orang ${r.side}</b><br>${escapeHtml(r.source)}<br><span style="color:#168467">↳ ${escapeHtml(r.result)}</span></div>`).join('')}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+async function translate(text,from,to){
+ const a=lang(from)[2],b=lang(to)[2];
+ const url='https://api.mymemory.translated.net/get?q='+encodeURIComponent(text.slice(0,450))+'&langpair='+encodeURIComponent(a+'|'+b);
+ const res=await fetch(url);if(!res.ok)throw new Error('Layanan terjemahan tidak merespons.');
+ const data=await res.json();if(data.responseStatus!==200)throw new Error(data.responseDetails||'Terjemahan gagal.');
+ return data.responseData.translatedText;
+}
+function speak(text,code){if(!('speechSynthesis'in window)){alert('Text-to-Speech tidak didukung browser ini.');return}
+ speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang=code;speechSynthesis.speak(u)}
+function start(side){
+ stop();
+ const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(!SR){setText('status'+side,'Browser ini belum mendukung Speech Recognition. Coba Chrome atau Edge.');return}
+ const from=side==='A'?'langA':'langB',to=side==='A'?'langB':'langA';
+ const source='source'+side,result='result'+side,status='status'+side,button='mic'+side;
+ recognition=new SR();recognition.lang=$(from).value;recognition.continuous=false;recognition.interimResults=true;recognition.maxAlternatives=1;
+ active=side;$(button).classList.add('listening');$(button).textContent='🔴 Mendengarkan…';setText(status,'Mendengarkan. Silakan berbicara dengan jelas.');
+ let finalText='';
+ recognition.onresult=async event=>{
+  let interim='';for(let i=event.resultIndex;i<event.results.length;i++){const t=event.results[i][0].transcript;if(event.results[i].isFinal)finalText+=t;else interim+=t}
+  setText(source,finalText+interim);
+  if(finalText.trim()&&event.results[event.results.length-1].isFinal){
+   const captured=finalText.trim();setText(status,'Menerjemahkan…');
+   try{const translated=await translate(captured,$(from).value,$(to).value);setText(result,translated);speak(translated,$(to).value);addHistory(side,captured,translated);setText(status,'Selesai. Tekan mikrofon untuk giliran berikutnya.')}
+   catch(e){setText(status,'Gagal menerjemahkan: '+e.message+' Periksa koneksi atau pasangan bahasa.')}
+  }
+ };
+ recognition.onerror=e=>setText(status,'Mikrofon/pengenalan suara: '+e.error+'. Periksa izin mikrofon dan koneksi internet.');
+ recognition.onend=()=>{if(active===side){active=null;$(button).classList.remove('listening');$(button).textContent='🎙️ Bicara '+side}};
+ try{recognition.start()}catch(e){setText(status,'Tidak dapat memulai mikrofon. Coba lagi.')}
+}
+function stop(){if(recognition){try{recognition.stop()}catch(e){}recognition=null}if(active){const b=$('mic'+active);b.classList.remove('listening');b.textContent='🎙️ Bicara '+active;active=null}}
+$('micA').onclick=()=>start('A');$('micB').onclick=()=>start('B');$('stopAll').onclick=stop;
+$('speakA').onclick=()=>speak($('resultA').textContent,$('langB').value);
+$('speakB').onclick=()=>speak($('resultB').textContent,$('langA').value);
+$('copyA').onclick=()=>navigator.clipboard?.writeText($('sourceA').textContent+'\n'+$('resultA').textContent);
+$('copyB').onclick=()=>navigator.clipboard?.writeText($('sourceB').textContent+'\n'+$('resultB').textContent);
+$('clearAll').onclick=()=>{stop();records=[];['sourceA','sourceB','resultA','resultB'].forEach(id=>$(id).innerHTML='<span class="hint">Belum ada percakapan.</span>');$('history').innerHTML='<div class="empty">Belum ada percakapan.</div>';$('count').textContent='0 percakapan';['statusA','statusB'].forEach(id=>setText(id,'Siap menerima suara.'))};
+updateTags();
+</script>
+</body></html>
