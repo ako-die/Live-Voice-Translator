@@ -1,0 +1,9 @@
+{
+  "name": "LIVE VOICE TRANSLATOR",
+  "short_name": "Voice Translator",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f3f6fb",
+  "theme_color": "#101a35",
+  "description": "Percakapan dua orang dengan terjemahan suara langsung."
+}
