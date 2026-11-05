@@ -167,8 +167,31 @@ async function translate(text,from,to){
  try{return await tryApertium(text,from,to)}catch(e){errors.push('Apertium: '+e.message)}
  throw new Error('Terjemahan belum berhasil. '+errors.join(' | ')+' Silakan coba ulang atau gunakan pasangan bahasa lain.');
 }
-function speak(text,code){if(!text||text==='Terjemahan belum tersedia.')return;if(!('speechSynthesis'in window)){alert('Text-to-Speech tidak didukung browser ini.');return}
- speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang=code;speechSynthesis.speak(u)}
+function speak(text,code){
+ if(!text||text==='Terjemahan belum tersedia.')return;
+ if(!('speechSynthesis'in window)){alert('Text-to-Speech tidak didukung browser ini.');return}
+ speechSynthesis.cancel();
+ // Potong bacaan pada tanda baca agar terdengar seperti percakapan alami.
+ const parts=text.match(/[^,;.!?]+[,;.!?]*/g)||[text];
+ const chunks=parts.map(x=>x.trim()).filter(Boolean);
+ let index=0;
+ function sayNext(){
+  if(index>=chunks.length)return;
+  const part=chunks[index++];
+  const u=new SpeechSynthesisUtterance(part);
+  u.lang=code;
+  u.rate=0.92;
+  u.pitch=1;
+  u.onend=()=>{
+   const punctuation=(part.match(/[,;.!?]+$/)||[''])[0];
+   const pause=/[.!?]/.test(punctuation)?600:/[,;]/.test(punctuation)?320:120;
+   setTimeout(sayNext,pause);
+  };
+  u.onerror=()=>{ if(index<chunks.length)setTimeout(sayNext,250); };
+  speechSynthesis.speak(u);
+ }
+ sayNext();
+}
 function start(side){
  stop();
  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
