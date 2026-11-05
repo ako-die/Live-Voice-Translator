@@ -9,7 +9,7 @@
 <link rel="apple-touch-icon" href="./icons/icon-192.png">
 <title>LIVE VOICE TRANSLATOR</title>
 <style>
-:root{--navy:#101a35;--navy2:#182747;--blue:#3478f6;--cyan:#55c7e8;--ink:#17233c;--muted:#71809b;--line:#e5eaf2;--bg:#f3f6fb;--white:#fff;--green:#159b75;--orange:#f0a43a}
+:root{--navy:#101a35;--navy2:#182747;--blue:#f07816;--cyan:#ffb14a;--ink:#17233c;--muted:#71809b;--line:#e5eaf2;--bg:#f3f6fb;--white:#fff;--green:#159b75;--orange:#f0a43a}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:Inter,Segoe UI,Arial,sans-serif;color:var(--ink)}
 header{background:linear-gradient(120deg,#101a35,#203d70);color:white;padding:22px 5vw 26px}
 .top{max-width:1240px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:18px}
@@ -20,16 +20,16 @@ main{max-width:1240px;margin:26px auto;padding:0 20px}
 .toolbar{background:white;border:1px solid var(--line);border-radius:18px;padding:17px;display:grid;grid-template-columns:1fr auto 1fr;gap:14px;align-items:end;box-shadow:0 5px 18px #1a31500b}
 .field label{display:block;font-size:12px;font-weight:700;color:var(--muted);margin:0 0 7px}
 select{width:100%;border:1px solid #dce3ef;border-radius:11px;padding:12px;background:#fff;color:var(--ink);font-size:14px;outline:none}
-.swap{width:42px;height:42px;border:0;border-radius:12px;background:#eaf2ff;color:var(--blue);font-size:20px;cursor:pointer}
+.swap{width:42px;height:42px;border:0;border-radius:12px;background:#fff0df;color:var(--blue);font-size:20px;cursor:pointer}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px}
 .panel{background:white;border:1px solid var(--line);border-radius:19px;overflow:hidden;box-shadow:0 7px 22px #1a31500b}
 .panelhead{padding:17px 19px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}
-.person{display:flex;align-items:center;gap:10px;font-weight:750}.avatar{width:35px;height:35px;border-radius:11px;display:grid;place-items:center;background:#eaf2ff;color:#2869dc}
+.person{display:flex;align-items:center;gap:10px;font-weight:750}.avatar{width:35px;height:35px;border-radius:11px;display:grid;place-items:center;background:#fff0df;color:#bd5c0b}
 .tag{font-size:11px;color:#61718b;background:#f1f4f9;padding:6px 9px;border-radius:20px}
 .content{padding:18px;min-height:220px;display:flex;flex-direction:column;gap:12px}
 .transcript{background:#f6f8fc;border:1px solid #edf0f6;border-radius:13px;padding:14px;min-height:90px;line-height:1.55;font-size:15px;white-space:pre-wrap;overflow-wrap:anywhere}
 .transcript .hint{color:#9aa6b8;font-size:13px}
-.result{background:#eef8f5;border:1px solid #d9f0e8;border-radius:13px;padding:14px;min-height:76px;line-height:1.55;font-size:15px;overflow-wrap:anywhere}
+.result{background:#fff8ef;border:1px solid #f6dfc4;border-radius:13px;padding:14px;min-height:76px;line-height:1.55;font-size:15px;overflow-wrap:anywhere}
 .result .hint{color:#7e9d93;font-size:13px}
 .actions{display:flex;gap:9px;flex-wrap:wrap}
 button{font:inherit;cursor:pointer}
@@ -87,9 +87,9 @@ footer{text-align:center;color:#98a4b5;font-size:11px;padding:24px}
   </section>
   <section class="centerbar"><div><strong>Mode percakapan dua arah</strong><br><span>Pilih mikrofon sesuai orang yang sedang berbicara. Terjemahan dan suara akan dibuat otomatis.</span></div><div class="actions"><button class="smallbtn" id="stopAll">■ Hentikan mikrofon</button><button class="smallbtn" id="clearAll">Bersihkan percakapan</button></div></section>
   <section class="history"><div class="historyhead"><h3>Riwayat percakapan</h3><span class="tag" id="count">0 percakapan</span></div><div class="historylist" id="history"><div class="empty">Belum ada percakapan.</div></div></section>
-  <div class="notice"><b>Catatan prototype:</b> Pengenalan suara menggunakan fitur browser (Web Speech API) dan paling baik di Google Chrome/Edge dengan koneksi internet serta izin mikrofon. Terjemahan memakai layanan MyMemory tanpa API key, dengan batas penggunaan dan dukungan bahasa yang dapat berubah. Untuk percakapan dua arah, masing-masing orang menekan tombol mikrofonnya saat berbicara; browser belum dapat memisahkan dua suara secara andal dari satu mikrofon. Hasil suara menggunakan suara Text-to-Speech yang tersedia di perangkat.</div>
+  <div class="notice"><b>Catatan prototype:</b> Pengenalan suara menggunakan fitur browser (Web Speech API) dan paling baik di Google Chrome/Edge dengan koneksi internet serta izin mikrofon. Terjemahan memakai MyMemory tanpa API key, lalu mencoba Apertium bila pasangan bahasa tersedia. Kualitas dan ketersediaan layanan gratis dapat berubah. Untuk percakapan dua arah, masing-masing orang menekan tombol mikrofonnya saat berbicara; browser belum dapat memisahkan dua suara secara andal dari satu mikrofon. Hasil suara menggunakan suara Text-to-Speech yang tersedia di perangkat.</div>
 </main>
-<footer>LIVE VOICE TRANSLATOR • Prototype 1.0 • Gunakan Chrome atau Microsoft Edge</footer>
+<footer>LIVE VOICE TRANSLATOR • Prototype 1.1 • Gunakan Chrome atau Microsoft Edge</footer>
 <script>
 const languages=[
 ['id-ID','Indonesia','id'],['en-US','English','en'],['ja-JP','日本語 (Jepang)','ja'],['zh-CN','中文 (Mandarin)','zh-CN'],
@@ -109,16 +109,65 @@ function updateTags(){$('tagA').textContent=lang($('langA').value)[1];$('tagB').
 $('langA').onchange=updateTags;$('langB').onchange=updateTags;
 $('swap').onclick=()=>{const a=$('langA').value;$('langA').value=$('langB').value;$('langB').value=a;updateTags()};
 function setText(id,text){$(id).textContent=text||''}
-function addHistory(side,source,result){records.unshift({side,source,result,time:new Date().toLocaleTimeString()});$('count').textContent=records.length+' percakapan';$('history').innerHTML=records.map(r=>`<div class="entry"><b>${r.time} • Orang ${r.side}</b><br>${escapeHtml(r.source)}<br><span style="color:#168467">↳ ${escapeHtml(r.result)}</span></div>`).join('')}
+function addHistory(side,source,result){records.unshift({side,source,result,time:new Date().toLocaleTimeString()});$('count').textContent=records.length+' percakapan';$('history').innerHTML=records.map(r=>`<div class="entry"><b>${r.time} • Orang ${r.side}</b><br>${escapeHtml(r.source)}<br><span style="color:#bd5c0b">↳ ${escapeHtml(r.result)}</span></div>`).join('')}
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+const apertiumCodes={
+ id:'ind',en:'eng',ja:'jpn',zh:'zho',ko:'kor',fr:'fra',de:'deu',es:'spa',
+ it:'ita',pt:'por',nl:'nld',ru:'rus',ar:'ara',hi:'hin',th:'tha',vi:'vie',
+ ms:'msa',tr:'tur',bn:'ben',tl:'tgl',pl:'pol',uk:'ukr',sv:'swe',el:'ell',
+ he:'heb',ta:'tam',fa:'fas',cs:'ces'
+};
+function cleanTranslation(value){
+ return String(value||'').replace(/<[^>]*>/g,'').replace(/&nbsp;/g,' ').replace(/\s+/g,' ').trim();
+}
+function looksUsableTranslation(source, translated){
+ const t=cleanTranslation(translated);
+ if(!t || t.length<1 || t.toLowerCase()===source.trim().toLowerCase()) return false;
+ if(/^(sorry|maafkan aku|i do not understand your language|saya tidak mengerti bahasamu)/i.test(t)) return false;
+ if(/[�]/.test(t)) return false;
+ return true;
+}
+async function tryMyMemory(text,a,b){
+ const params=new URLSearchParams({q:text.slice(0,450),langpair:a+'|'+b,mt:'1'});
+ const res=await fetch('https://api.mymemory.translated.net/get?'+params.toString(),{cache:'no-store'});
+ if(!res.ok) throw new Error('MyMemory HTTP '+res.status);
+ const data=await res.json();
+ if(Number(data.responseStatus)!==200) throw new Error(data.responseDetails||'MyMemory menolak pasangan bahasa ini.');
+ const candidates=[data.responseData?.translatedText,...(data.matches||[]).sort((x,y)=>(Number(y.match)||0)-(Number(x.match)||0)).map(x=>x.translation)];
+ for(const item of candidates){const t=cleanTranslation(item);if(looksUsableTranslation(text,t)) return t;}
+ throw new Error('MyMemory tidak memberikan hasil terjemahan yang layak.');
+}
+async function tryApertium(text,from,to){
+ const a=apertiumCodes[from],b=apertiumCodes[to];
+ if(!a||!b) throw new Error('Kode bahasa tidak tersedia untuk Apertium.');
+ const pair=a+'|'+b;
+ const pairRes=await fetch('https://www.apertium.org/apy/listPairs',{cache:'no-store'});
+ if(!pairRes.ok) throw new Error('Daftar pasangan Apertium tidak dapat diakses.');
+ const pairData=await pairRes.json();
+ const pairs=Array.isArray(pairData)?pairData:(pairData.responseData||pairData.pairs||[]);
+ const available=pairs.some(p=>{
+  const s=p.sourceLanguage||p.source||p[0],t=p.targetLanguage||p.target||p[1];
+  return (s+'|'+t)===pair;
+ });
+ if(!available) throw new Error('Pasangan bahasa ini belum tersedia di Apertium.');
+ const params=new URLSearchParams({langpair:pair,q:text.slice(0,450)});
+ const res=await fetch('https://www.apertium.org/apy/translate?'+params.toString(),{cache:'no-store'});
+ if(!res.ok) throw new Error('Apertium HTTP '+res.status);
+ const data=await res.json();
+ const t=cleanTranslation(data.responseData?.translatedText||data.translatedText);
+ if(!looksUsableTranslation(text,t)) throw new Error('Apertium tidak memberikan hasil yang layak.');
+ return t;
+}
 async function translate(text,from,to){
  const a=lang(from)[2],b=lang(to)[2];
- const url='https://api.mymemory.translated.net/get?q='+encodeURIComponent(text.slice(0,450))+'&langpair='+encodeURIComponent(a+'|'+b);
- const res=await fetch(url);if(!res.ok)throw new Error('Layanan terjemahan tidak merespons.');
- const data=await res.json();if(data.responseStatus!==200)throw new Error(data.responseDetails||'Terjemahan gagal.');
- return data.responseData.translatedText;
+ if(!text.trim()) throw new Error('Tidak ada ucapan yang dapat diterjemahkan.');
+ if(a===b) return text;
+ const errors=[];
+ try{return await tryMyMemory(text,a,b)}catch(e){errors.push('MyMemory: '+e.message)}
+ try{return await tryApertium(text,from,to)}catch(e){errors.push('Apertium: '+e.message)}
+ throw new Error('Terjemahan belum berhasil. '+errors.join(' | ')+' Silakan coba ulang atau gunakan pasangan bahasa lain.');
 }
-function speak(text,code){if(!('speechSynthesis'in window)){alert('Text-to-Speech tidak didukung browser ini.');return}
+function speak(text,code){if(!text||text==='Terjemahan belum tersedia.')return;if(!('speechSynthesis'in window)){alert('Text-to-Speech tidak didukung browser ini.');return}
  speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang=code;speechSynthesis.speak(u)}
 function start(side){
  stop();
@@ -135,7 +184,7 @@ function start(side){
   if(finalText.trim()&&event.results[event.results.length-1].isFinal){
    const captured=finalText.trim();setText(status,'Menerjemahkan…');
    try{const translated=await translate(captured,$(from).value,$(to).value);setText(result,translated);speak(translated,$(to).value);addHistory(side,captured,translated);setText(status,'Selesai. Tekan mikrofon untuk giliran berikutnya.')}
-   catch(e){setText(status,'Gagal menerjemahkan: '+e.message+' Periksa koneksi atau pasangan bahasa.')}
+   catch(e){setText(result,'Terjemahan belum tersedia.');setText(status,'⚠️ '+e.message)}
   }
  };
  recognition.onerror=e=>setText(status,'Mikrofon/pengenalan suara: '+e.error+'. Periksa izin mikrofon dan koneksi internet.');
