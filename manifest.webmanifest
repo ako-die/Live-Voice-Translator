@@ -2,8 +2,13 @@
   "name": "LIVE VOICE TRANSLATOR",
   "short_name": "Voice Translator",
   "start_url": "./",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#f3f6fb",
+  "background_color": "#101a35",
   "theme_color": "#101a35",
-  "description": "Percakapan dua orang dengan terjemahan suara langsung."
+  "description": "Percakapan dua orang dengan terjemahan suara langsung.",
+  "icons": [
+    {"src":"./icons/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any"},
+    {"src":"./icons/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any"}
+  ]
 }

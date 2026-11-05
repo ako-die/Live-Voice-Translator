@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#101a35">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" type="image/png" href="./icons/favicon.png">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
 <title>LIVE VOICE TRANSLATOR</title>
 <style>
 :root{--navy:#101a35;--navy2:#182747;--blue:#3478f6;--cyan:#55c7e8;--ink:#17233c;--muted:#71809b;--line:#e5eaf2;--bg:#f3f6fb;--white:#fff;--green:#159b75;--orange:#f0a43a}
@@ -45,9 +48,16 @@ button{font:inherit;cursor:pointer}
 .entry b{color:#365b9a}.empty{font-size:12px;color:#98a4b5}
 footer{text-align:center;color:#98a4b5;font-size:11px;padding:24px}
 @media(max-width:760px){.toolbar{grid-template-columns:1fr 42px 1fr}.grid{grid-template-columns:1fr}.content{min-height:180px}.pill{display:none}}
+
+#launchSplash{position:fixed;inset:0;z-index:9999;background:#101a35 url('./splash-screen.png') center/cover no-repeat;display:flex;align-items:flex-end;justify-content:center;padding:8vh 20px}
+#launchSplash button{border:0;border-radius:30px;background:#ff7900;color:#fff;font-weight:800;font-size:20px;padding:15px 48px;box-shadow:0 8px 22px #0005}
+#launchSplash.hidden{display:none}
+@media(min-width:700px){#launchSplash{background-size:contain}}
+
 </style>
 </head>
 <body>
+<div id="launchSplash"><button type="button" onclick="document.getElementById('launchSplash').classList.add('hidden')">▶ Start</button></div>
 <header><div class="top"><div class="brand"><div class="logo">⇄</div><div><h1>LIVE VOICE TRANSLATOR</h1><div class="sub">Percakapan dua orang • Terjemahan suara langsung</div></div></div><div class="pill">WEB APP • PC & MOBILE</div></div></header>
 <main>
   <section class="toolbar">
