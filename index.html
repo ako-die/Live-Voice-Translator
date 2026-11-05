@@ -87,7 +87,7 @@ footer{text-align:center;color:#98a4b5;font-size:11px;padding:24px}
   </section>
   <section class="centerbar"><div><strong>Mode percakapan dua arah</strong><br><span>Pilih mikrofon sesuai orang yang sedang berbicara. Terjemahan dan suara akan dibuat otomatis.</span></div><div class="actions"><button class="smallbtn" id="stopAll">■ Hentikan mikrofon</button><button class="smallbtn" id="clearAll">Bersihkan percakapan</button></div></section>
   <section class="history"><div class="historyhead"><h3>Riwayat percakapan</h3><span class="tag" id="count">0 percakapan</span></div><div class="historylist" id="history"><div class="empty">Belum ada percakapan.</div></div></section>
-  <div class="notice"><b>Catatan prototype:</b> Pengenalan suara menggunakan fitur browser (Web Speech API) dan paling baik di Google Chrome/Edge dengan koneksi internet serta izin mikrofon. Terjemahan memakai layanan MyMemory tanpa API key, dengan batas penggunaan dan dukungan bahasa yang dapat berubah. Untuk percakapan dua arah, masing-masing orang menekan tombol mikrofonnya saat berbicara; browser belum dapat memisahkan dua suara secara andal dari satu mikrofon. Hasil suara menggunakan suara Text-to-Speech yang tersedia di perangkat.</div>
+  <div class="notice"><b>Catatan prototype:</b> Pengenalan suara menggunakan fitur browser (Web Speech API) dan paling baik di Google Chrome/Edge dengan koneksi internet serta izin mikrofon. Terjemahan memakai layanan Google Translate publik tanpa API key; koneksi internet diperlukan dan ketersediaan layanan dapat berubah. Untuk percakapan dua arah, masing-masing orang menekan tombol mikrofonnya saat berbicara; browser belum dapat memisahkan dua suara secara andal dari satu mikrofon. Hasil suara menggunakan suara Text-to-Speech yang tersedia di perangkat.</div>
 </main>
 <footer>LIVE VOICE TRANSLATOR • Prototype 1.0 • Gunakan Chrome atau Microsoft Edge</footer>
 <script>
@@ -104,6 +104,8 @@ const $=id=>document.getElementById(id);
 for(const id of ['langA','langB']) languages.forEach(([code,name])=>{const o=document.createElement('option');o.value=code;o.textContent=name;$(id).append(o)});
 $('langA').value='id-ID';$('langB').value='en-US';
 let active=null, recognition=null, records=[];
+let sessionId=0;
+const turnId={A:0,B:0};
 function lang(code){return languages.find(x=>x[0]===code)||languages[0]}
 function updateTags(){$('tagA').textContent=lang($('langA').value)[1];$('tagB').textContent=lang($('langB').value)[1]}
 $('langA').onchange=updateTags;$('langB').onchange=updateTags;
@@ -113,10 +115,14 @@ function addHistory(side,source,result){records.unshift({side,source,result,time
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 async function translate(text,from,to){
  const a=lang(from)[2],b=lang(to)[2];
- const url='https://api.mymemory.translated.net/get?q='+encodeURIComponent(text.slice(0,450))+'&langpair='+encodeURIComponent(a+'|'+b);
- const res=await fetch(url);if(!res.ok)throw new Error('Layanan terjemahan tidak merespons.');
- const data=await res.json();if(data.responseStatus!==200)throw new Error(data.responseDetails||'Terjemahan gagal.');
- return data.responseData.translatedText;
+ // Google Translate public endpoint; no API key required for this prototype.
+ const url='https://translate.googleapis.com/translate_a/single?client=gtx&sl='+encodeURIComponent(a)+'&tl='+encodeURIComponent(b)+'&dt=t&q='+encodeURIComponent(text);
+ const res=await fetch(url);
+ if(!res.ok)throw new Error('Layanan terjemahan tidak merespons.');
+ const data=await res.json();
+ const translated=(data?.[0]||[]).map(part=>part?.[0]||'').join('').trim();
+ if(!translated)throw new Error('Terjemahan kosong. Coba ulangi ucapan.');
+ return translated;
 }
 function speak(text,code){
  if(!text)return;
@@ -148,35 +154,99 @@ function speak(text,code){
  }
  speakNext();
 }
+let sessionNumber=0;
 function start(side){
  stop();
  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
  if(!SR){setText('status'+side,'Browser ini belum mendukung Speech Recognition. Coba Chrome atau Edge.');return}
  const from=side==='A'?'langA':'langB',to=side==='A'?'langB':'langA';
  const source='source'+side,result='result'+side,status='status'+side,button='mic'+side;
- recognition=new SR();recognition.lang=$(from).value;recognition.continuous=false;recognition.interimResults=true;recognition.maxAlternatives=1;
- active=side;$(button).classList.add('listening');$(button).textContent='🔴 Mendengarkan…';setText(status,'Mendengarkan. Silakan berbicara dengan jelas.');
+ const thisSession=++sessionId;
+ const thisTurn=++turnId[side];
+ const sourceLang=$(from).value, targetLang=$(to).value;
+ speechSynthesis?.cancel();
+ setText(source,'');
+ setText(result,'Menunggu ucapan…');
+ recognition=new SR();
+ const currentRecognition=recognition;
+ recognition.lang=sourceLang;
+ recognition.continuous=false;
+ recognition.interimResults=true;
+ recognition.maxAlternatives=1;
+ active=side;
+ $(button).classList.add('listening');
+ $(button).textContent='🔴 Mendengarkan…';
+ setText(status,'Mendengarkan. Silakan berbicara dengan jelas.');
  let finalText='';
- recognition.onresult=async event=>{
-  let interim='';for(let i=event.resultIndex;i<event.results.length;i++){const t=event.results[i][0].transcript;if(event.results[i].isFinal)finalText+=t;else interim+=t}
-  setText(source,finalText+interim);
-  if(finalText.trim()&&event.results[event.results.length-1].isFinal){
-   const captured=finalText.trim();setText(status,'Menerjemahkan…');
-   try{const translated=await translate(captured,$(from).value,$(to).value);setText(result,translated);speak(translated,$(to).value);addHistory(side,captured,translated);setText(status,'Selesai. Tekan mikrofon untuk giliran berikutnya.')}
-   catch(e){setText(status,'Gagal menerjemahkan: '+e.message+' Periksa koneksi atau pasangan bahasa.')}
+ let interimText='';
+ let failed=false;
+ recognition.onresult=event=>{
+  if(thisSession!==sessionId)return;
+  finalText=''; interimText='';
+  for(let i=0;i<event.results.length;i++){
+   const item=event.results[i];
+   const phrase=item[0]?.transcript||'';
+   if(item.isFinal)finalText+=phrase+' ';
+   else interimText+=phrase+' ';
+  }
+  setText(source,(finalText+interimText).trim());
+ };
+ recognition.onerror=event=>{
+  if(thisSession!==sessionId)return;
+  failed=true;
+  setText(status,'Mikrofon/pengenalan suara: '+event.error+'. Periksa izin mikrofon dan koneksi internet.');
+ };
+ recognition.onend=async()=>{
+  if(thisSession!==sessionId)return;
+  active=null;
+  if(recognition===currentRecognition)recognition=null;
+  $(button).classList.remove('listening');
+  $(button).textContent='🎙️ Bicara '+side;
+  const captured=finalText.trim();
+  if(failed||!captured){
+   if(!failed)setText(status,'Ucapan belum tertangkap. Tekan mikrofon dan coba lagi.');
+   return;
+  }
+  setText(source,captured);
+  setText(status,'Menerjemahkan…');
+  try{
+   const translated=await translate(captured,sourceLang,targetLang);
+   // Ignore late responses if a newer turn has started or languages/side changed.
+   if(thisTurn!==turnId[side]||thisSession!==sessionId)return;
+   setText(result,translated);
+   addHistory(side,captured,translated);
+   speak(translated,targetLang);
+   setText(status,'Selesai. Tekan mikrofon untuk giliran berikutnya.');
+  }catch(error){
+   if(thisTurn!==turnId[side]||thisSession!==sessionId)return;
+   setText(result,'Terjemahan belum tersedia.');
+   setText(status,'Gagal menerjemahkan: '+error.message+' Periksa koneksi atau pasangan bahasa.');
   }
  };
- recognition.onerror=e=>setText(status,'Mikrofon/pengenalan suara: '+e.error+'. Periksa izin mikrofon dan koneksi internet.');
- recognition.onend=()=>{if(active===side){active=null;$(button).classList.remove('listening');$(button).textContent='🎙️ Bicara '+side}};
- try{recognition.start()}catch(e){setText(status,'Tidak dapat memulai mikrofon. Coba lagi.')}
+ try{recognition.start()}catch(error){
+  if(thisSession===sessionId){setText(status,'Tidak dapat memulai mikrofon. Coba lagi.');stop()}
+ }
 }
-function stop(){if(recognition){try{recognition.stop()}catch(e){}recognition=null}if(active){const b=$('mic'+active);b.classList.remove('listening');b.textContent='🎙️ Bicara '+active;active=null}}
+function stop(){
+ sessionId++;
+ if(recognition){
+  const old=recognition;
+  recognition=null;
+  try{old.stop()}catch(error){}
+ }
+ if(active){
+  const button=$('mic'+active);
+  button.classList.remove('listening');
+  button.textContent='🎙️ Bicara '+active;
+  active=null;
+ }
+}
 $('micA').onclick=()=>start('A');$('micB').onclick=()=>start('B');$('stopAll').onclick=stop;
 $('speakA').onclick=()=>speak($('resultA').textContent,$('langB').value);
 $('speakB').onclick=()=>speak($('resultB').textContent,$('langA').value);
 $('copyA').onclick=()=>navigator.clipboard?.writeText($('sourceA').textContent+'\n'+$('resultA').textContent);
 $('copyB').onclick=()=>navigator.clipboard?.writeText($('sourceB').textContent+'\n'+$('resultB').textContent);
-$('clearAll').onclick=()=>{stop();records=[];['sourceA','sourceB','resultA','resultB'].forEach(id=>$(id).innerHTML='<span class="hint">Belum ada percakapan.</span>');$('history').innerHTML='<div class="empty">Belum ada percakapan.</div>';$('count').textContent='0 percakapan';['statusA','statusB'].forEach(id=>setText(id,'Siap menerima suara.'))};
+$('clearAll').onclick=()=>{stop();turnId.A++;turnId.B++;speechSynthesis?.cancel();records=[];['sourceA','sourceB','resultA','resultB'].forEach(id=>$(id).innerHTML='<span class="hint">Belum ada percakapan.</span>');$('history').innerHTML='<div class="empty">Belum ada percakapan.</div>';$('count').textContent='0 percakapan';['statusA','statusB'].forEach(id=>setText(id,'Siap menerima suara.'))};
 updateTags();
 </script>
 </body></html>
